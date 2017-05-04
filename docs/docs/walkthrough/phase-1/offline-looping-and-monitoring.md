@@ -32,9 +32,9 @@ from inside your openAPS directory, before your loop will start updating correct
 
 ### Pancreabble
 
-_(TO DO Note - Pancreabble instructions for OpenAPS need to be re-worked to reflect the oref0-setup script way of making it work. Below is notes about Pancreabble setup prior to oref0-setup.sh being in existence.)_
-
 [Pancreabble] is a way to monitor your loop _locally_, by pairing a Pebble smartwatch directly with the Raspberry Pi or Intel Edison.
+
+[Pancreabble]: https://github.com/mddub/pancreabble
 
 In other words, whereas the default setup looks like this:
 
@@ -60,21 +60,19 @@ Raspberry Pi/Intel Edison -> Bluetooth -> Pebble watch
 
 Using a Pebble watch can be especially helpful during the "open loop" phase: you can send the loop's recommendations directly to your wrist, making it easy to evaluate the decisions it would make in different contexts during the day (before/after eating, when active, etc.).
 
-See [Pancreabble] for initial setup instructions.
+#### Add BT to your oref0 setup if necessary
 
-[Pancreabble]: https://github.com/mddub/pancreabble
+If you setup your rig using the 'non-bluetooth' setup script, you will need to add this functionality by re-running the setup script and adding a BT parameter.
 
-Once you've done the first stages above, you'll need to do generate a status file that can be passed over to the Pebble Urchin watch face. Fortunately, the core of this is available in oref0.
+First, take a look at your existing parameters: 
+`cd ~/myopenaps && cat oref0-runagain.sh`
 
-Go to `~src/oref0/bin` and look for `peb-urchin-status.sh`. This gives you the basic framework to generate output files that can be used with Pancreabble. To use it, you'll need to install jq using:
+Next, add the Pebble's mac address `--btpeb='AA:BB:CC:DD:EE:FF'` to the bottom of the setup script.
 
-`apt-get install jq`
+`cd ~/myopenaps && nano oref0-runagain.sh`
 
-If you get errors, you may need to run `apt-get update` ahead of attempting to install jq.
-
-Once jq is installed, the shell script runs and produces the `urchin-status.json` file which is needed to update the status on the pebble. It can be incorporated into an alias that regularly updates the pebble. You can modify it to produce messages that you want to see there.
-
-When installing the oref0-setup you will need to replace all instances of AA:BB:CC:DD:EE:FF with the Pebble MAC address. This can be found in Settings/System/Information/BT Address.  NOTE: Make sure the MAC address is in ALL CAPS.
+Then execute the script.
+`bash ~/myopenaps/oref0-runagain.sh`
 
 Once you've installed, you will need to pair the watch to your Edison.
 
@@ -132,6 +130,27 @@ you will see on the edison
 
 Once paired, type quit to exit.
 
+#### Troubleshooting the pair process
+
+a) If you get:
+
+```
+Failed to pair: org.bluez.Error.AlreadyExists
+```
+you need to do this...
+
+`bluetoothctl`
+
+```
+[bluetooth]# devices  
+  -> If there is something in here, run: 
+[bluetooth]# remove XX:XX:XX:XX:XX:XX  
+   Now run the command trust and then try to pair:    
+[bluetooth]# trust XX:XX:XX:XX:XX:XX  
+[bluetooth]# pair XX:XX:XX:XX:XX:XX 
+```
+
+#### To turn on temp basal notifications
 
 Currently the `peb-urchin-status.sh` has 1 notification and 3 different options for urchin messages.
 in you APS directory there is a file called 'pancreoptions.json' 
